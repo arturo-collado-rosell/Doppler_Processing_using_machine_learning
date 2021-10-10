@@ -14,21 +14,33 @@ import numpy.matlib
 
 def synthetic_IQ_data( **kwargs ):
     
-    """ 
+    """ Function to create synthetic IQ weather data. The DEP model for phenomenom and 
+    clutter are gaussian functions. This function follows the ideas of the paper 
+    "Simulation of weatherlike Doppler spectra and signals" by Dusan Zrnic, 1975
+    
     Possible Inputs:
-    clutter_power,
-    clutter_s_w, 
-    phenom_power, 
-    phenom_vm,
-    phenom_s_w,
-    noise_power, 
-    M, 
-    wavelength,
-    PRF,
-    radar_mode 
-    int_stagg 
-    samples_factor
-    num_realizations
+        
+        clutter_power: power of clutter [times]
+        clutter_s_w : clutter spectrum width [m/s] 
+        phenom_power: power of phenom [times] 
+        phenom_vm: phenom mean Doppler velocity [m/s]
+        phenom_s_w: phenom spectrum width [m/s]
+        noise_power: noise power [times] 
+        M: number of samples in a CPI, the sequence length  
+        wavelength: radar wavelength [m] 
+        PRF: Pulse Repetition Frequecy [Hz]
+        radar_mode: Can be "uniform" or "staggered" 
+        int_stagg: list with staggered sequence, by default it is [2,3] when radar_mode == "staggered" 
+        samples_factor: it needed for windows effects, by default it is set to 10
+        num_realizations: number of realization 
+    
+    Outputs:
+        z_IQ: numpy array of shape [num_realization, M] with the complex IQ data
+        time: time grid.
+        
+        posible calls:
+            data, time = synthetic_IQ_data(**params), where params is a dictionary 
+            with parameters name as keys
     
     """
     # some default parameters if not provided 
@@ -160,6 +172,22 @@ def synthetic_IQ_data( **kwargs ):
 
 
 def DEP_estimation(z_IQ, PRF, w):
+    """
+    Parameters
+    ----------
+    z_IQ : numpy array
+        complex IQ data.
+    PRF : float
+        Pulse Repetition Time [Hz].
+    w : numpy array
+        windows used.
+
+    Returns
+    -------
+    dep : numpy array
+        estimated DEP by means of periodograms.
+
+    """
     U = sum(w**2)
     (I,M) = z_IQ.shape
     dep = np.zeros(z_IQ.shape)
