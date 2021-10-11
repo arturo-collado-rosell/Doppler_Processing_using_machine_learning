@@ -64,9 +64,10 @@ def synthetic_IQ_data( **kwargs ):
         sample_index = np.arange(M)
         num_samples_uniform = M 
     else:
-        num_samples_uniform = round(M - 1)* sum(int_stagg)/len(int_stagg) + 1
-        sample_index = np.cumsum(np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
-        sample_index = sample_index[:M]
+        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+        sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
+        sample_index = np.concatenate(([0], sample_index[:-1]))
+        sample_index =  sample_index[:M]
     
     if 'samples_factor' not in kwargs:
         samples_factor = 10
@@ -173,7 +174,7 @@ def synthetic_IQ_data( **kwargs ):
 
 def DEP_estimation(z_IQ, PRF, w):
     """
-    Parameters
+    Inputs
     ----------
     z_IQ : numpy array
         complex IQ data.
@@ -188,9 +189,9 @@ def DEP_estimation(z_IQ, PRF, w):
         estimated DEP by means of periodograms.
 
     """
-    U = sum(w**2)
+    U = sum(w**2) # window energy
     (I,M) = z_IQ.shape
-    dep = np.zeros(z_IQ.shape)
+    
     if I == 1:
         dep = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
     else:
@@ -198,7 +199,33 @@ def DEP_estimation(z_IQ, PRF, w):
     return dep    
     
     
-
+def zero_interpolation(z_IQ, int_stagg):
+    
+    """ 
+    Input:
+    ------
+    z_IQ : numpy array
+        complex IQ staggered data.
+    int_stagg: array 
+        staggered relationship e.g [2,3]    
+        
+    Return:
+    ------
+    z_IQ_interp: numpy array
+        staggered data with zero interpolation    
+    
+    """
+    (I,M) = z_IQ.shape
+    num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+    sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
+    sample_index = np.concatenate(([0], sample_index[:-1]))
+    sample_index =  sample_index[:M]
+    z_IQ_interp = np.zeros((I,num_samples_uniform), dtype = complex)
+    z_IQ_interp[:,sample_index] = z_IQ
+    return z_IQ_interp
+           
+    
+    
     
 
     
