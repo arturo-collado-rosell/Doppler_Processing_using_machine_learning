@@ -48,7 +48,8 @@ def synthetic_IQ_data( **kwargs ):
         M = 64     #default M value
     elif kwargs['M']%2 !=0:
         M = kwargs['M'] + 1 # if M is not an even number we add 1 to convert it to an even number 
-            
+    else:
+        M = kwargs['M']        
     if 'radar_mode' not in kwargs:
         radar_mode = 'uniform'
     
@@ -129,7 +130,7 @@ def synthetic_IQ_data( **kwargs ):
     
     dep_p = np.zeros(num_samples,)
     if phenomFlag:
-        idx_0 = round(p_fm * num_samples/PRF)
+        idx_0 = int(np.round(p_fm * num_samples/PRF))
         freq_0 = p_fm - idx_0 * PRF/num_samples
         dep_p = phenom_power / np.sqrt(2 * np.pi)/ p_s_w_f * np.exp(-(f - freq_0)**2 / (2 * p_s_w_f**2))
         dep_p = np.roll(dep_p, idx_0)
@@ -172,7 +173,7 @@ def synthetic_IQ_data( **kwargs ):
     return z_IQ, time
 
 
-def DEP_estimation(z_IQ, PRF, w):
+def PSD_estimation(z_IQ, PRF, w):
     """
     Inputs
     ----------
@@ -185,7 +186,7 @@ def DEP_estimation(z_IQ, PRF, w):
 
     Returns
     -------
-    dep : numpy array
+    psd : numpy array
         estimated DEP by means of periodograms.
 
     """
@@ -193,10 +194,10 @@ def DEP_estimation(z_IQ, PRF, w):
     (I,M) = z_IQ.shape
     
     if I == 1:
-        dep = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
+        psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
     else:
-        dep = 1/PRF/U * np.sum(np.abs(np.fft.fft(z_IQ, axis = 1))**2, axis = 0 )
-    return dep    
+        psd = 1/PRF/U * np.sum(np.abs(np.fft.fft(z_IQ, axis = 1))**2, axis = 0 )
+    return psd    
     
     
 def zero_interpolation(z_IQ, int_stagg):
@@ -226,12 +227,197 @@ def zero_interpolation(z_IQ, int_stagg):
            
     
     
+def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode = 'uniform', **kwargs):
     
+    """ 
+    Possible inputs:
+    -------
+    M: data length
+    Fc: radar carrier frecuecy [Hz]
+    Tu: pulse repetition time [s]. In the case of staggered [n1, n2], Tu = T2 - T1
+    theta_3dB_acimut: acimut one-way half power width [degree]
+    radar_mode: radar operation mode, it could be 'uniform' or 'staggered'
+    int_stagg: staggered integers e.g [2, 3]
+    N_vel: velocity classes
+    N_spectral_w: spectral with classes
+    N_csr: clutter to noise ratio classes. It account for the non-clutter class
+    N_snr: signal to noise ratio classes.
+    csr_interval: CSR interval for grid construcction [csr_min, csr_max] e.g [0, 50] [dB]
+    s_w_interval: spectral width interval for grid construcction [s_w_min, s_w_max] * v_a, these two numbers must be fractionals one e.g [0.04, 0.4]*v_a, [m/s] 
+    snr_interval: signal to noise ratio interval [snr_min, snr_max], e.g [0, 30] [dB]
+    
+    """
+    np.random.seed(2021) # seed for reproducibility 
+    wavelenght = 3e8/Fc
+    v_a = wavelenght/(4.0*Tu)
+    
+    
+    if 'N_snr' in kwargs:
+        N_snr = kwargs['N_snr']
+    else:
+        N_snr = 15 
+        
+    if 'snr_interval' in kwargs:
+        snr_interval_min = kwargs['snr_interval'][0]
+        snr_interval_max = kwargs['snr_interval'][1]
+    else:
+        snr_interval_min = 0
+        snr_interval_max = 30       
+            
+    if 'N_csr' in kwargs:
+        N_csr = kwargs['N_csr']
+    else:
+        N_csr = 26        
+        
+    if 'csr_interval' in kwargs:
+        csr_min = kwargs['csr_interval'][0]
+        csr_max = kwargs['csr_interval'][1]
+    else:
+        csr_min = 0
+        csr_max = 50    
+    # specific parameters dependent of the operational mode
+    if radar_mode == 'uniform':   
+        num_samples_uniform = M
+        # radar rotation speed    
+        w =  theta_3dB_acimut * np.pi/180.0 / (M * Tu)
+        if 'N_vel' in kwargs:
+            N_vel = kwargs['N_vel']
+        else:
+            N_vel = 40
+            
+        if 'N_spectral_w' in kwargs:
+            N_s_w = kwargs['N_spectral_w']
+        else:
+            N_s_w = 12
+            
+            
+        if 's_w_interval' in kwargs:
+            s_w_interval_min = kwargs['s_w_interval'][0]
+            s_w_interval_max = kwargs['s_w_interval'][1]
+        else:
+            s_w_interval_min = 0.04
+            s_w_interval_max = 0.4   
+ 
+    elif radar_mode == 'staggered':
+        if 'int_stagg' in kwargs:
+            int_stagg = kwargs['int_stagg']
+        else:
+            int_stagg = [2, 3]
+
+        # radar rotation speed
+        w =  theta_3dB_acimut * np.pi/180.0 / (M * sum(int_stagg)/len(int_stagg)* Tu)
+        if 'N_vel' in kwargs:
+            N_vel = kwargs['N_vel']
+        else:
+            N_vel = 50
+            
+        if 'N_spectral_w' in kwargs:
+            N_s_w = kwargs['N_spectral_w']
+        else:
+            N_s_w = 10
+                             
+        if 's_w_interval' in kwargs:
+            s_w_interval_min = kwargs['s_w_interval'][0]
+            s_w_interval_max = kwargs['s_w_interval'][1]
+        else:
+            s_w_interval_min = 0.04
+            s_w_interval_max = 0.2          
+            
+        # staggered indexs
+        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+        sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
+        sample_index = np.concatenate(([0], sample_index[:-1]))
+        sample_index =  sample_index[:M]
+    else:
+        raise Exception('The radar operation mode is not valid')
 
     
+    clutter_spectral_width = w*wavelenght * np.sqrt(np.log(2.0)) / (2.0 * np.pi * theta_3dB_acimut* np.pi/180.0) # [m/s]
+    Sp = 1 # precipitation power
+
+
+    ######### signal parameters intervals ################################## 
+    # Clutter power grid
+    csr = np.linspace(csr_min, csr_max, N_csr-1)
+    Sc_grid = np.concatenate((np.zeros(8,), 10.0**csr))* Sp
+    # spectral width grid
+    s_width_grid = np.linspace(s_w_interval_min, s_w_interval_max, N_s_w) * v_a
+    # velocity grid
+    vel_step = 2.0/N_vel * v_a
+    vel_grid = -np.arange(-v_a + vel_step/2.0, v_a , vel_step) 
+    # snr grid
+    snr_grid = np.linspace(snr_interval_min, snr_interval_max, N_snr)
+    noise_power_grid = Sp/(10.0**(snr_grid/10.0))
     
+    N_Sc = len(Sc_grid)
     
+    L = 5 # number of realizations per meteorological situation 
+    data_PSD = np.zeros(shape = (N_Sc * N_s_w * N_vel * N_snr * L, num_samples_uniform + 3), dtype = 'float32')
     
+    #defining some imput parameters which are fixed
+    parameters_with_clutter = {'phenom_power':1,
+                               'clutter_s_w': clutter_spectral_width,
+                               'PRF':1/Tu,
+                               'radar_mode':radar_mode,
+                               'M':M,
+                               'wavelenght':wavelenght,
+                               'int_stagg':[2, 3],
+                               'num_realizations':1
+                               }   
+    
+    #windows
+    window = np.kaiser(num_samples_uniform, 8)
+
+    # looping throw the four parameter grids
+    for i in range(N_vel):
+        print(i)
+        aux = 0
+        for s in range(N_Sc):
+            
+            if Sc_grid[s] == 0:
+                aux += 1
+            for n in range(N_snr):
+                
+                for q in range(N_s_w):
+                    
+                    ## update the input parameters
+                    parameters_with_clutter['phenom_vm'] = vel_grid[i]
+                    parameters_with_clutter['phenom_s_w'] = s_width_grid[q]
+                    parameters_with_clutter['clutter_power'] = Sc_grid[s]
+                    parameters_with_clutter['noise_power'] = noise_power_grid[n]
+                    
+                    for j in range(L):
+                        
+                        
+                        z_IQ, _ = synthetic_IQ_data(**parameters_with_clutter)
+                        
+                        if radar_mode == 'staggered':
+                            z_IQ_zero_interp = zero_interpolation(z_IQ, int_stagg)
+                            data_w = z_IQ_zero_interp * window
+                        else:
+                            data_w = z_IQ * window
+                        
+                        ##PSD estimation
+                        psd = PSD_estimation(data_w, w = window, PRF = 1/Tu)
+                        psd = psd /np.max(psd)
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, :M] = 10*np.log10(psd[0,:])
+                        if Sc_grid[s] == 0:
+                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M] = 0
+                        else:
+                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M] = s - aux + 1
+                        
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M+1] = i
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M+2] = q
+                                 
+                        
+                        
+    np.save('data_to_train', data_PSD)             
+                        
+                        
+Input_params = {'M':64,
+                'Fc': 5.6e9}    
+    
+synthetic_data_train(**Input_params)    
     
     
     

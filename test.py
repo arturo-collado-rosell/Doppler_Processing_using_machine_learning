@@ -38,10 +38,10 @@ else:
     data_w = data * w 
 
 # DEP estimation using periodogram
-dep = synthetic_weather_data_IQ.DEP_estimation(data_w, w = w, PRF = parameters['PRF'])
+psd = synthetic_weather_data_IQ.PSD_estimation(data_w, w = w, PRF = parameters['PRF'])
     
     
 
-# Plotting the DEP 
-plt.plot(10*np.log10(np.fft.fftshift(dep[0,:])))    
+# Plotting the PSD 
+plt.plot(10*np.log10(np.fft.fftshift(psd[0,:])))    
 plt.show()
