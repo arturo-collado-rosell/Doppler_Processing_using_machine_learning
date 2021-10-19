@@ -7,7 +7,7 @@ Created on Sat Oct  9 13:29:35 2021
 email: arturo.collado.rosell@gmail.com
 """
 
-
+import sys
 import numpy as np
 import numpy.matlib
 
@@ -225,7 +225,18 @@ def zero_interpolation(z_IQ, int_stagg):
     z_IQ_interp[:,sample_index] = z_IQ
     return z_IQ_interp
            
-    
+def progressbar(it, prefix="", size=60, file=sys.stdout):
+    count = len(it)
+    def show(j):
+        x = int(size*j/count)
+        file.write("%s[%s%s] %i/%i\n" % (prefix, "#"*x, "."*(size-x), j, count))
+        file.flush()        
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i+1)
+    file.write("\n")
+    file.flush()
     
 def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode = 'uniform', **kwargs):
     
@@ -245,7 +256,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
     csr_interval: CSR interval for grid construcction [csr_min, csr_max] e.g [0, 50] [dB]
     s_w_interval: spectral width interval for grid construcction [s_w_min, s_w_max] * v_a, these two numbers must be fractionals one e.g [0.04, 0.4]*v_a, [m/s] 
     snr_interval: signal to noise ratio interval [snr_min, snr_max], e.g [0, 30] [dB]
-    
+    L: number of realization for every meteorological situation
     """
     np.random.seed(2021) # seed for reproducibility 
     wavelenght = 3e8/Fc
@@ -351,7 +362,11 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
     
     N_Sc = len(Sc_grid)
     
-    L = 5 # number of realizations per meteorological situation 
+    
+    if 'L' in kwargs:
+        L = kwargs['L']
+    else:
+        L = 5 # number of realizations per meteorological situation 
     data_PSD = np.zeros(shape = (N_Sc * N_s_w * N_vel * N_snr * L, num_samples_uniform + 3), dtype = 'float32')
     
     #defining some imput parameters which are fixed
@@ -369,8 +384,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
     window = np.kaiser(num_samples_uniform, 8)
 
     # looping throw the four parameter grids
-    for i in range(N_vel):
-        print(i)
+    for i in progressbar(range(N_vel), 'Computing:') :
         aux = 0
         for s in range(N_Sc):
             
@@ -412,12 +426,9 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
                         
                         
     np.save('data_to_train', data_PSD)             
+    print('Data generation has finished')                    
                         
-                        
-Input_params = {'M':64,
-                'Fc': 5.6e9}    
-    
-synthetic_data_train(**Input_params)    
+   
     
     
     
