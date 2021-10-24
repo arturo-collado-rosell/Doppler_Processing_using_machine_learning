@@ -58,6 +58,8 @@ def synthetic_IQ_data( **kwargs ):
         if radar_mode == 'staggered':
             if 'int_stagg' not in kwargs:
                 int_stagg = [2, 3]
+            else:
+                int_stagg = kwargs['int_stagg']
     else:
         radar_mode = 'uniform'    
     
@@ -414,18 +416,18 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
                         ##PSD estimation
                         psd = PSD_estimation(data_w, w = window, PRF = 1/Tu)
                         psd = psd /np.max(psd)
-                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, :M] = 10*np.log10(psd[0,:])
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, :num_samples_uniform] = 10*np.log10(psd[0,:])
                         if Sc_grid[s] == 0:
-                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M] = 0
+                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform] = 0
                         else:
-                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M] = s - aux + 1
+                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform] = s - aux + 1
                         
-                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M+1] = i
-                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, M+2] = q
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform+1] = i
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform+2] = q
                                  
                         
-                        
-    np.save('data_to_train', data_PSD)             
+    return data_PSD, N_vel, N_s_w, N_csr, radar_mode                    
+    # np.save('data_to_train', data_PSD)             
     print('Data generation has finished')                    
                         
    
