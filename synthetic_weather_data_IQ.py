@@ -31,7 +31,7 @@ def synthetic_IQ_data( **kwargs ):
         PRF: Pulse Repetition Frequecy [Hz]
         radar_mode: Can be "uniform" or "staggered" 
         int_stagg: list with staggered sequence, by default it is [2,3] when radar_mode == "staggered" 
-        samples_factor: it needed for windows effects, by default it is set to 10
+        samples_factor: it is needed for windows effects, by default it is set to 10
         num_realizations: number of realization 
     
     Outputs:
