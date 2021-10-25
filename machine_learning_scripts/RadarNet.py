@@ -17,6 +17,8 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
 
+
+
     #################Conv1D architecture##################################
     
 def build_conv1D_velocity_branch(inputs, numCategories, finalAct = 'softmax'):
@@ -83,7 +85,7 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
     with tf.device(device):
         #compiling the model
         opt = Adam(lr=1e-4) 
-        EPOCHS = 10
+        EPOCHS = 3
         BS = 512
     
         losses = {"velocity_output":"categorical_crossentropy","width_output":"categorical_crossentropy", "csr_output":"categorical_crossentropy"}
@@ -108,6 +110,8 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
                       callbacks=[custom_early_stopping])
                   
         end = time.time()
+        # Saving the model
+        model.save(device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5')
         elapsed_time = end - start
         print('The trainig time was {} seconds'.format(elapsed_time))    
         return H
@@ -168,57 +172,94 @@ def plot_training( H, directory):
     plt.savefig(directory  + "{}_accs.png".format('train_and_validate'))
     plt.show()
 
-#create a new figure for the Precision
-    precisionNames = ["velocity_output_precision", "width_output_precision", "csr_output_precision"]
-    plt.style.use("ggplot")
-    (fig, ax) = plt.subplots(3, 1, figsize=(8, 8))
+# #create a new figure for the Precision
+#     precisionNames = ["velocity_output_precision_2", "width_output_precision_2", "csr_output_precision_2"]
+#     plt.style.use("ggplot")
+#     (fig, ax) = plt.subplots(3, 1, figsize=(8, 8))
      
-    Precision_t_vector = []
-    Precision_v_vector = []
-    # loop over the accuracy names
-    for (i, l) in enumerate(precisionNames):
+#     Precision_t_vector = []
+#     Precision_v_vector = []
+#     # loop over the accuracy names
+#     for (i, l) in enumerate(precisionNames):
         
-     	# plot the loss for both the training and validation data
-        ax[i].set_title("Precision for {}".format(l))
-        ax[i].set_xlabel("Epoch #")
-        ax[i].set_ylabel("Precision")
-        ax[i].plot(np.arange(0, EPOCHS), H.history[l], label=l)
-        ax[i].plot(np.arange(0, EPOCHS), H.history["val_" + l], label="val_" + l)
-        ax[i].legend()
-        Precision_t_vector.append(H.history[l])
-        Precision_v_vector.append(H.history["val_" + l])
+#      	# plot the loss for both the training and validation data
+#         ax[i].set_title("Precision for {}".format(l))
+#         ax[i].set_xlabel("Epoch #")
+#         ax[i].set_ylabel("Precision")
+#         ax[i].plot(np.arange(0, EPOCHS), H.history[l], label=l)
+#         ax[i].plot(np.arange(0, EPOCHS), H.history["val_" + l], label="val_" + l)
+#         ax[i].legend()
+#         Precision_t_vector.append(H.history[l])
+#         Precision_v_vector.append(H.history["val_" + l])
      
-    # save the accuracies figure
-    plt.tight_layout()
-    plt.savefig(directory + "{}_precision.png".format('train_and_validate'))
-    plt.show()
-# create a new figure for the Recall
-    recallNames = ["velocity_output_recall", "width_output_recall", "csr_output_recall"]
-    plt.style.use("ggplot")
-    (fig, ax) = plt.subplots(3, 1, figsize=(8, 8))
+#     # save the accuracies figure
+#     plt.tight_layout()
+#     plt.savefig(directory + "{}_precision.png".format('train_and_validate'))
+#     plt.show()
+# # create a new figure for the Recall
+#     recallNames = ["velocity_output_recall_2", "width_output_recall_2", "csr_output_recall_2"]
+#     plt.style.use("ggplot")
+#     (fig, ax) = plt.subplots(3, 1, figsize=(8, 8))
      
-    Recall_t_vector = []
-    Recall_v_vector = []
-    # loop over the accuracy names
-    for (i, l) in enumerate(recallNames):
+#     Recall_t_vector = []
+#     Recall_v_vector = []
+#     # loop over the accuracy names
+#     for (i, l) in enumerate(recallNames):
         
-     	# plot the loss for both the training and validation data
-        ax[i].set_title("Recall for {}".format(l))
-        ax[i].set_xlabel("Epoch #")
-        ax[i].set_ylabel("Recall")
-        ax[i].plot(np.arange(0, EPOCHS), H.history[l], label=l)
-        ax[i].plot(np.arange(0, EPOCHS), H.history["val_" + l], label="val_" + l)
-        ax[i].legend()
-        Recall_t_vector.append(H.history[l])
-        Recall_v_vector.append(H.history["val_" + l])
+#      	# plot the loss for both the training and validation data
+#         ax[i].set_title("Recall for {}".format(l))
+#         ax[i].set_xlabel("Epoch #")
+#         ax[i].set_ylabel("Recall")
+#         ax[i].plot(np.arange(0, EPOCHS), H.history[l], label=l)
+#         ax[i].plot(np.arange(0, EPOCHS), H.history["val_" + l], label="val_" + l)
+#         ax[i].legend()
+#         Recall_t_vector.append(H.history[l])
+#         Recall_v_vector.append(H.history["val_" + l])
      
-    # save the accuracies figure
-    plt.tight_layout()
-    plt.savefig(directory + "{}_recall.png".format('train_and_validate'))    
-    plt.show()
+#     # save the accuracies figure
+#     plt.tight_layout()
+#     plt.savefig(directory + "{}_recall.png".format('train_and_validate'))    
+#     plt.show()
     
     #save training and validation loss and accuracy
     # pd.DataFrame( Loss_t_vector).to_csv(directory +'Losstraining' + '.csv')
     # pd.DataFrame( Loss_v_vector).to_csv(directory+'Lossvalidation' + '.csv')
     # pd.DataFrame( Accuracy_t_vector).to_csv(directory+'Accuracytraining' + '.csv')
     # pd.DataFrame( Accuracy_v_vector).to_csv(directory+'Accuracyvalidation' + '.csv')
+    
+def prediction(model, data_PSD, device = 'CPU:/0'):
+    """
+
+    
+    """
+    with tf.device(device):
+        
+        (y_pred_vel, y_pred_sw, y_pred_csr) = model.predict(data_PSD)
+        y_pred_vel = np.argmax(y_pred_vel, axis = 1)
+        y_pred_sw = np.argmax(y_pred_sw, axis = 1)
+        y_pred_csr = np.argmax(y_pred_csr, axis = 1)
+        
+        return y_pred_vel, y_pred_sw, y_pred_csr
+    
+
+
+
+
+
+
+
+
+
+    
+    
+    
+
+
+
+
+
+
+
+
+
+    

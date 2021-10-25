@@ -22,7 +22,7 @@ parameters_phenom = {'phenom_power':1, 'phenom_vm':10, 'phenom_s_w':2,
               'noise_power': 1.0e-5,
               'radar_mode':'staggered'}   
 
-parameters = parameters_phenom
+parameters = parameters_with_clutter
 #data generation
 data, time = synthetic_weather_data_IQ.synthetic_IQ_data(**parameters)
 

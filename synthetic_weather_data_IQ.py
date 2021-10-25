@@ -352,7 +352,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
     ######### signal parameters intervals ################################## 
     # Clutter power grid
     csr = np.linspace(csr_min, csr_max, N_csr-1)
-    Sc_grid = np.concatenate((np.zeros(8,), 10.0**csr))* Sp
+    Sc_grid = np.concatenate((np.zeros(8,), 10.0**(csr/10)))* Sp
     # spectral width grid
     s_width_grid = np.linspace(s_w_interval_min, s_w_interval_max, N_s_w) * v_a
     # velocity grid
@@ -385,7 +385,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
     #windows
     window = np.kaiser(num_samples_uniform, 8)
 
-    # looping throw the four parameter grids
+    # looping through the four parameter grids
     for i in progressbar(range(N_vel), 'Computing:') :
         aux = 0
         for s in range(N_Sc):
@@ -416,14 +416,14 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
                         ##PSD estimation
                         psd = PSD_estimation(data_w, w = window, PRF = 1/Tu)
                         psd = psd /np.max(psd)
-                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, :num_samples_uniform] = 10*np.log10(psd[0,:])
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L + j, :num_samples_uniform] = 10*np.log10(psd[0,:])
                         if Sc_grid[s] == 0:
-                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform] = 0
+                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L + j, num_samples_uniform] = 0
                         else:
-                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform] = s - aux + 1
+                            data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L + j, num_samples_uniform] = s - aux + 1
                         
-                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform+1] = i
-                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L, num_samples_uniform+2] = q
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L + j, num_samples_uniform+1] = i
+                        data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L + j, num_samples_uniform+2] = q
                                  
                         
     return data_PSD, N_vel, N_s_w, N_csr, radar_mode                    
