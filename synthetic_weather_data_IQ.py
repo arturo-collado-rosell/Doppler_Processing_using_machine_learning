@@ -200,7 +200,37 @@ def PSD_estimation(z_IQ, PRF, w):
     else:
         psd = 1/PRF/U * np.sum(np.abs(np.fft.fft(z_IQ, axis = 1))**2, axis = 0 )
     return psd    
+
+def PSD_estimation_parallel(z_IQ, PRF, w):
+    """
+    Inputs
+    ----------
+    z_IQ : numpy array
+        complex IQ data.
+    PRF : float
+        Pulse Repetition Time [Hz].
+    w : numpy array
+        windows used.
+
+    Returns
+    -------
+    psd : numpy array
+        estimated DEP by means of periodograms.
+
+    """
+    U = sum(w**2) # window energy
+    (I,M) = z_IQ.shape
     
+    if I == 1:
+        psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
+    else:
+        psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
+    return psd    
+    
+    
+    
+    
+        
     
 def zero_interpolation(z_IQ, int_stagg):
     
@@ -226,6 +256,63 @@ def zero_interpolation(z_IQ, int_stagg):
     z_IQ_interp = np.zeros((I,num_samples_uniform), dtype = complex)
     z_IQ_interp[:,sample_index] = z_IQ
     return z_IQ_interp
+
+def window_spectral_width(window, PRF):
+    f_index = np.arange(-0.5, 0.5, 1/len(window))
+    Sw = np.abs(np.fft.fftshift(np.fft.fft(window)))**2
+    sw_window = np.sqrt(np.sum(f_index**2 * Sw)/ np.sum(Sw))
+    return sw_window*PRF
+
+def clutter_power(z_IQ, T1, T2, clutter_sw, window = 'Kaiser', alpha = 8):
+    I,M = z_IQ.shape
+    if T1 == T2:
+        Tu = T1
+        num_samples_uniform = M
+        sample_index = np.arange(0,num_samples_uniform,1)
+        operation_mode = 'uniform'
+    else:
+        Tu = T2-T1
+        n1, n2 = round(T1/Tu), round(T2/Tu)  
+        int_stagg = [n1, n2]
+        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+        sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
+        sample_index = np.concatenate(([0], sample_index[:-1]))
+        sample_index =  sample_index[:M]
+        operation_mode = 'staggered'
+        
+    if window == 'Kaiser':
+        w = np.kaiser(num_samples_uniform, alpha)
+    else:
+        raise Exception('At the moment you can use a Kaiser window only')  
+    # windowing the data    
+    z_IQ_w = z_IQ * np.matlib.repmat( w[sample_index] , I, 1 )    
+    data_zero_interp = np.zeros((I,sample_index[-1]+1), dtype = complex)
+    data_zero_interp[:, sample_index] = z_IQ_w
+    
+    #PSD estimation
+    psd = PSD_estimation_parallel(data_zero_interp, w = w[sample_index], PRF = 1/Tu)
+    sw_window = window_spectral_width(w, PRF = 1/Tu)
+    sw_clutter = np.sqrt(clutter_sw**2 + sw_window**2)
+    df = 1/Tu/(M)
+    if operation_mode == 'staggered':
+        clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
+        clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
+    else:
+        clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
+        
+    return clutter_power_e
+        
+     
+                
+            
+        
+    
+    
+    
+    
+    
+    
+    
            
 def progressbar(it, prefix="", size=60, file=sys.stdout):
     count = len(it)

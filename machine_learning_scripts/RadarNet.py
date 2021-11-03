@@ -85,7 +85,7 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
     with tf.device(device):
         #compiling the model
         opt = Adam(lr=1e-4) 
-        EPOCHS = 3
+        EPOCHS = 100
         BS = 512
     
         losses = {"velocity_output":"categorical_crossentropy","width_output":"categorical_crossentropy", "csr_output":"categorical_crossentropy"}

@@ -16,7 +16,7 @@ Input_params = {'M':64,
                 'Tu':0.25e-3,
                 'theta_3dB_acimut':1,
                 'radar_mode':'staggered',
-                'L': 4
+                'L': 5
                 }    
     
 data_PSD, N_vel, N_s_w, N_csr, radar_mode = synthetic_weather_data_IQ.synthetic_data_train(**Input_params) 
