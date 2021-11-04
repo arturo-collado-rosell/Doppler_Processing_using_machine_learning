@@ -58,7 +58,11 @@ model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches
 ############################
 model.summary()
 
-H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr)
+
+EPOCHS = 100
+BS = 512
+lr = 1e-4
+H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
 RadarNet.plot_training(H, directory = 'plot_training/')

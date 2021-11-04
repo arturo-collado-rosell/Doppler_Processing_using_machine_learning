@@ -81,12 +81,12 @@ def build_all_conv1D(input_shape, numCategories_velocity, numCategories_width, n
                 name = "radarnet_conv1d")
     return model
     
-def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr):
+def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, EPOCHS, BS, lr):
     with tf.device(device):
         #compiling the model
-        opt = Adam(lr=1e-4) 
-        EPOCHS = 100
-        BS = 512
+        opt = Adam(lr=lr) 
+        EPOCHS = EPOCHS
+        BS = BS
     
         losses = {"velocity_output":"categorical_crossentropy","width_output":"categorical_crossentropy", "csr_output":"categorical_crossentropy"}
         lossWeights = {"velocity_output": 1.0, "width_output": 1.0 , "csr_output": 1.0}    

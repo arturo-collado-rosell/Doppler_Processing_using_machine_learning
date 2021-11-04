@@ -39,7 +39,6 @@ Sp = 1
 vm = [0.2*va, 0.4*va]
 spectral_w = [3, 5]
 csr = np.linspace(0, 50, 25)
-# csr = np.ones((25,))*40
 Sc = Sp * 10**(csr/10)
 
 radar_mode = 'staggered'
@@ -110,7 +109,7 @@ for i in synthetic_weather_data_IQ.progressbar(range(N_vel), 'Computing:') :
                 psd = psd /np.max(psd)
                 data_PSD[i*N_Sc*N_sw*L + q*N_sw*L + j*L + ind_l,:] = 10*np.log10(psd[0,:])
                 
-################################################################                
+###########################Estimations###########################################                
 clutter_power = synthetic_weather_data_IQ.clutter_power(complex_IQ_data, 2*Tu, 3*Tu, clutter_spectral_width * 2/wavelenght, window = 'Kaiser', alpha = 8)                
 #predictions using the NN
 model = tf.keras.models.load_model('GPU_100_512model.h5')
@@ -155,14 +154,13 @@ for i in range(N_vel):
             clutt_power_batch = clutter_power[i*N_Sc*N_sw*L + q*N_sw*L + j*L: i*N_Sc*N_sw*L + q*N_sw*L + (j+1)*L] 
             power_phenom_batch = clutt_power_batch / (10.0**(batch_csr/10.0)) * (batch_csr >= 0 )
             
-            pow_NN[j,q,i], std_pow_NN[j,q,i] = np.mean(power_phenom_batch), np.std(power_phenom_batch)
-            
-            vel_NN[j,q,i], std_vel_NN[j,q,i] = np.mean(batch_vel), np.std(batch_vel)
-             
+            #Bias and standard deviation
+            pow_NN[j,q,i], std_pow_NN[j,q,i] = np.mean(power_phenom_batch), np.std(power_phenom_batch)           
+            vel_NN[j,q,i], std_vel_NN[j,q,i] = np.mean(batch_vel), np.std(batch_vel)             
             sw_NN[j,q,i], std_sw_NN[j,q,i] = np.mean(batch_sw), np.std(batch_sw)
              
             
-###Ploting the results
+###Ploting the results##############################################################
 
 #Power Bias
 graph = plt.figure(figsize = (7,4))
