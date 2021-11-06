@@ -16,11 +16,11 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 
 
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession 
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
+# from tensorflow.compat.v1 import ConfigProto
+# from tensorflow.compat.v1 import InteractiveSession 
+# config = ConfigProto()
+# config.gpu_options.allow_growth = True
+# session = InteractiveSession(config=config)
 
 
 #number of categories, from the some_params_to_train.npy is extracted this information
@@ -67,7 +67,7 @@ model.summary()
 EPOCHS = 100
 BS = 512
 lr = 1e-4
-H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, EPOCHS, BS, lr)
+H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, '', EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
 RadarNet.plot_training(H, 'plot_training/')
