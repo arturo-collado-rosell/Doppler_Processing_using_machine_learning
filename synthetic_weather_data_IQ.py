@@ -292,14 +292,33 @@ def clutter_power(z_IQ, T1, T2, clutter_sw, window = 'Kaiser', alpha = 8):
     #PSD estimation
     psd = PSD_estimation_parallel(data_zero_interp, w = w[sample_index], PRF = 1/Tu)
     sw_window = window_spectral_width(w, PRF = 1/Tu)
-    sw_clutter = np.sqrt(clutter_sw**2 + sw_window**2)
+    sw_clutter = np.sqrt(clutter_sw**2 + np.ones(clutter_sw.shape)*sw_window**2)
     df = 1/Tu/(M)
     if operation_mode == 'staggered':
         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
         clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
     else:
         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
+    # if len(clutter_sw) == 1:        
+    #     sw_clutter = np.sqrt(clutter_sw**2 + sw_window**2)
+    #     df = 1/Tu/(M)
+    #     if operation_mode == 'staggered':
+    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
+    #         clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
+    #     else:
+    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
+    # elif len(clutter_sw)> 1:
+    #     sw_clutter = np.sqrt(clutter_sw**2 + np.ones(clutter_sw.shape)*sw_window**2)
+    #     df = 1/Tu/(M)
+    #     if operation_mode == 'staggered':
+    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
+    #         clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
+    #     else:
+    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
         
+        
+        
+    
     return clutter_power_e
         
      
@@ -471,7 +490,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
     
     #windows
     window = np.kaiser(num_samples_uniform, 8)
-
+    print('Synthetic data generation for training')
     # looping through the four parameter grids
     for i in progressbar(range(N_vel), 'Computing:') :
         aux = 0

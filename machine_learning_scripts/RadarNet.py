@@ -21,67 +21,9 @@ import tensorflow as tf
 
     #################Conv1D architecture##################################
     
-def build_conv1D_velocity_branch(inputs, numCategories, finalAct = 'softmax'):
-    x = Conv1D(5, 5, activation="relu")(inputs)
-    x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    #x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    x = Flatten()(x)
-    # x = Dense(200, activation="relu")(x)
-    # x = Dense(100, activation="relu")(x)
-    x = Dense(80, activation="relu")(x)
-    x = Dense(60, activation="relu")(x)
-    x = Dense(numCategories, activation= finalAct, name = "velocity_output")(x)
-    return x
+
     
-      
-def build_conv1D_width_branch(inputs, numCategories, finalAct = 'softmax'):
-    x = Conv1D(5, 5, activation="relu")(inputs)
-    x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    x = Flatten()(x)
-    # x = Dense(200, activation="relu")(x)
-    # x = Dense(100, activation="relu")(x)
-    x = Dense(80, activation="relu")(x)
-    x = Dense(40, activation="relu")(x)
-    x = Dense(numCategories, activation= finalAct, name = "width_output")(x)
-    return x    
-    
-      
-def build_conv1D_csr_branch(inputs, numCategories, finalAct = 'softmax'):
-    x = Conv1D(5, 5, activation="relu")(inputs)
-    x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    # x = Conv1D(5, 5, activation="relu")(x)
-    x = Flatten()(x)
-    # x = Dense(200, activation="relu")(x)
-    # x = Dense(100, activation="relu")(x)
-    x = Dense(80, activation="relu")(x)
-    x = Dense(50, activation="relu")(x)
-    x = Dense(numCategories, activation= finalAct, name = "csr_output")(x)
-    return x    
-    
-        
-    
-def build_all_conv1D(input_shape, numCategories_velocity, numCategories_width, numCategories_cnr):
-    inputs = Input(shape = (input_shape,1))
-       
-        
-    velocity_branch = build_conv1D_velocity_branch(inputs,numCategories_velocity, finalAct = 'softmax')
-    width_branch = build_conv1D_width_branch(inputs, numCategories_width, finalAct = 'softmax')
-    csr_branch = build_conv1D_csr_branch(inputs, numCategories_cnr, finalAct = 'softmax')
-        
-    model = Model(
-                inputs = inputs,
-                outputs = [velocity_branch, width_branch, csr_branch],
-                name = "radarnet_conv1d")
-    return model
-    
-def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, EPOCHS, BS, lr):
+def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save, EPOCHS = 100, BS = 512, lr = 1e-4):
     with tf.device(device):
         #compiling the model
         opt = Adam(lr=lr) 
@@ -111,12 +53,12 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
                   
         end = time.time()
         # Saving the model
-        model.save(device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5')
+        model.save(directory_to_save + device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5')
         elapsed_time = end - start
         print('The trainig time was {} seconds'.format(elapsed_time))    
         return H
 
-def plot_training( H, directory):
+def plot_training( H, directory_to_save):
     # plot the total loss, category loss, and color loss
     lossNames = ["loss", "velocity_output_loss", "width_output_loss", "csr_output_loss"]
     plt.style.use("ggplot")
@@ -143,7 +85,7 @@ def plot_training( H, directory):
      
     # save the losses figure and create a new figure for the accuracies
     plt.tight_layout()
-    plt.savefig(directory + "{}_loss.png".format('train_and_validate'))
+    plt.savefig(directory_to_save + "{}_loss.png".format('train_and_validate'))
     plt.show()
     
     
@@ -169,7 +111,7 @@ def plot_training( H, directory):
      
     # save the accuracies figure
     plt.tight_layout()
-    plt.savefig(directory  + "{}_accs.png".format('train_and_validate'))
+    plt.savefig(directory_to_save  + "{}_accs.png".format('train_and_validate'))
     plt.show()
 
 # #create a new figure for the Precision
@@ -222,10 +164,10 @@ def plot_training( H, directory):
 #     plt.show()
     
     #save training and validation loss and accuracy
-    # pd.DataFrame( Loss_t_vector).to_csv(directory +'Losstraining' + '.csv')
-    # pd.DataFrame( Loss_v_vector).to_csv(directory+'Lossvalidation' + '.csv')
-    # pd.DataFrame( Accuracy_t_vector).to_csv(directory+'Accuracytraining' + '.csv')
-    # pd.DataFrame( Accuracy_v_vector).to_csv(directory+'Accuracyvalidation' + '.csv')
+    pd.DataFrame( Loss_t_vector).to_csv(directory_to_save +'Losstraining' + '.csv')
+    pd.DataFrame( Loss_v_vector).to_csv(directory_to_save+'Lossvalidation' + '.csv')
+    pd.DataFrame( Accuracy_t_vector).to_csv(directory_to_save+'Accuracytraining' + '.csv')
+    pd.DataFrame( Accuracy_v_vector).to_csv(directory_to_save+'Accuracyvalidation' + '.csv')
     
 def prediction(model, data_PSD, device = 'CPU:/0'):
     """
@@ -247,13 +189,59 @@ def prediction(model, data_PSD, device = 'CPU:/0'):
 
 
 
-
-
+def build_conv1D_vel_branch(inputs, numCategories, dict_vel_layers, finalAct = 'softmax'):   
+    conv_layers = dict_vel_layers['conv']
+    dense_layers = dict_vel_layers['dense']    
+    x = Conv1D(conv_layers[0][0],conv_layers[0][1], activation="relu")(inputs)
+    for l in conv_layers[1:]:
+        x = Conv1D(l[0], l[1], activation="relu")(x)       
+    x = Flatten()(x)    
+    for l in dense_layers:
+        x = Dense(l, activation="relu")(x)   
+    x = Dense(numCategories, activation= finalAct, name = "velocity_output")(x)
+    return x
 
     
+def build_conv1D_width1_branch(inputs, numCategories, dict_width_layers, finalAct = 'softmax'):   
+    conv_layers = dict_width_layers['conv']
+    dense_layers = dict_width_layers['dense']    
+    x = Conv1D(conv_layers[0][0],conv_layers[0][1], activation="relu")(inputs)
+    for l in conv_layers[1:]:
+        x = Conv1D(l[0], l[1], activation="relu")(x)       
+    x = Flatten()(x)    
+    for l in dense_layers:
+        x = Dense(l, activation="relu")(x)   
+    x = Dense(numCategories, activation= finalAct, name = "width_output")(x)
+    return x
+    
+    
+def build_conv1D_csr1_branch(inputs, numCategories, dict_csr_layers, finalAct = 'softmax'):   
+    conv_layers = dict_csr_layers['conv']
+    dense_layers = dict_csr_layers['dense']    
+    x = Conv1D(conv_layers[0][0],conv_layers[0][1], activation="relu")(inputs)
+    for l in conv_layers[1:]:
+        x = Conv1D(l[0], l[1], activation="relu")(x)       
+    x = Flatten()(x)    
+    for l in dense_layers:
+        x = Dense(l, activation="relu")(x)   
+    x = Dense(numCategories, activation= finalAct, name = "csr_output")(x)
+    return x
     
     
 
+def create_convolutional_network(input_shape, numCategories_velocity, numCategories_width, numCategories_cnr, dict_vel_layers, dict_sw_layers, dict_csr_layers):
+    inputs = Input(shape = (input_shape,1))
+       
+        
+    velocity_branch = build_conv1D_vel_branch(inputs,numCategories_velocity, dict_vel_layers, finalAct = 'softmax')
+    width_branch = build_conv1D_width1_branch(inputs, numCategories_width, dict_sw_layers , finalAct = 'softmax')
+    csr_branch = build_conv1D_csr1_branch(inputs, numCategories_cnr, dict_csr_layers, finalAct = 'softmax')
+        
+    model = Model(
+                inputs = inputs,
+                outputs = [velocity_branch, width_branch, csr_branch],
+                name = "radarnet_conv1d")
+    return model
 
 
 

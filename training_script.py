@@ -54,7 +54,12 @@ y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 device = '/GPU:0'
 # Here you can build your model, every brach separated or the deafult branch networks 
 
-model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
+# model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
+
+dict_vel_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 70] }
+dict_width_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 50] }
+dict_csr_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 60] }
+model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_layers, dict_width_layers, dict_csr_layers)
 ############################
 model.summary()
 
@@ -65,4 +70,4 @@ lr = 1e-4
 H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
-RadarNet.plot_training(H, directory = 'plot_training/')
+RadarNet.plot_training(H, 'plot_training/')
