@@ -12,15 +12,16 @@ sys.path.insert(1, 'machine_learning_scripts/')
 import RadarNet 
 
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 
 
-# from tensorflow.compat.v1 import ConfigProto
-# from tensorflow.compat.v1 import InteractiveSession 
-# config = ConfigProto()
-# config.gpu_options.allow_growth = True
-# session = InteractiveSession(config=config)
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession 
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
 
 
 #number of categories, from the some_params_to_train.npy is extracted this information
@@ -50,8 +51,8 @@ y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
 y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 
 
-# device = '/CPU:0'
-device = '/GPU:0'
+device = '/CPU:0'
+# device = '/GPU:0'
 # Here you can build your model, every brach separated or the deafult branch networks 
 
 # model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
@@ -59,15 +60,52 @@ device = '/GPU:0'
 dict_vel_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 70] }
 dict_width_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 50] }
 dict_csr_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 60] }
-model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_layers, dict_width_layers, dict_csr_layers)
+# model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_layers, dict_width_layers, dict_csr_layers)
 ############################
-model.summary()
-
+# model.summary()
 
 EPOCHS = 100
 BS = 512
 lr = 1e-4
-H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, '', EPOCHS, BS, lr)
+directory_to_save_model = device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5'
+# H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save_model, EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
-RadarNet.plot_training(H, 'plot_training/')
+#RadarNet.plot_training(H, 'plot_training/')
+
+########################Predictions to build the class diference histograms #######
+
+model = tf.keras.models.load_model(directory_to_save_model)
+
+with tf.device(device):
+    (ypred_vel, ypred_width, ypred_csr) = model.predict(X_test)
+    ypred_vel = np.argmax(ypred_vel, axis = 1)   # select the velocity class
+    ypred_width = np.argmax(ypred_width, axis = 1) # select the width class 
+    ypred_csr = np.argmax(ypred_csr, axis = 1) # select the width class 
+
+diff_vel = ypred_vel - y_test[:,1]
+diff_width = ypred_width - y_test[:,2]
+diff_csr = ypred_csr - y_test[:,0]
+
+pd.DataFrame(diff_vel).to_csv("velocity_diff.csv")
+pd.DataFrame(diff_width).to_csv( "sw_diff.csv")
+pd.DataFrame(diff_csr).to_csv("CSR_diff.csv")
+
+import matplotlib.pyplot as plt
+fig = plt.figure() 
+plt.hist(diff_vel)
+plt.xlabel('Velocity error classes ')
+plt.ylabel('Normalized frequency')
+fig.show()
+
+fig = plt.figure() 
+plt.hist(diff_width)
+plt.xlabel('Spectrum width  error classes ')
+plt.ylabel('Normalized frequency')
+fig.show()
+
+fig = plt.figure() 
+plt.hist(diff_csr)
+plt.xlabel('CSR error classes ')
+plt.ylabel('Normalized frequency')
+fig.show()

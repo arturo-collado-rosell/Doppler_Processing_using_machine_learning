@@ -67,7 +67,7 @@ def synthetic_IQ_data( **kwargs ):
         sample_index = np.arange(M)
         num_samples_uniform = M 
     else:
-        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) 
         sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
         sample_index = np.concatenate(([0], sample_index[:-1]))
         sample_index =  sample_index[:M]
@@ -249,7 +249,7 @@ def zero_interpolation(z_IQ, int_stagg):
     
     """
     (I,M) = z_IQ.shape
-    num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+    num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) 
     sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
     sample_index = np.concatenate(([0], sample_index[:-1]))
     sample_index =  sample_index[:M]
@@ -274,7 +274,7 @@ def clutter_power(z_IQ, T1, T2, clutter_sw, window = 'Kaiser', alpha = 8):
         Tu = T2-T1
         n1, n2 = round(T1/Tu), round(T2/Tu)  
         int_stagg = [n1, n2]
-        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) 
         sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
         sample_index = np.concatenate(([0], sample_index[:-1]))
         sample_index =  sample_index[:M]
@@ -443,7 +443,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
             s_w_interval_max = 0.2          
             
         # staggered indexs
-        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+        num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) 
         sample_index = np.cumsum( np.matlib.repmat(int_stagg, 1, round(M/len(int_stagg))))
         sample_index = np.concatenate(([0], sample_index[:-1]))
         sample_index =  sample_index[:M]

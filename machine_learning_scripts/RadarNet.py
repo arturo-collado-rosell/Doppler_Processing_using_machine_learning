@@ -53,7 +53,7 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
                   
         end = time.time()
         # Saving the model
-        model.save(directory_to_save + device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5')
+        model.save(directory_to_save)
         elapsed_time = end - start
         print('The trainig time was {} seconds'.format(elapsed_time))    
         return H

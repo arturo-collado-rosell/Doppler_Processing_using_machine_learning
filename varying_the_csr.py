@@ -78,7 +78,7 @@ parameters_with_clutter = {    'clutter_s_w': clutter_spectral_width,
                                'num_realizations':I
                                }   
 #window
-num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) 
 window = np.kaiser(num_samples_uniform, 8)
 
 

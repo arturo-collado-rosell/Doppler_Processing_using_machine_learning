@@ -65,7 +65,7 @@ parameters_with_clutter = {      'clutter_power':Sc,
                                'num_realizations':I
                                }   
 #window
-num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) + 1
+num_samples_uniform = round((M - 1)* sum(int_stagg)/len(int_stagg)) 
 window = np.kaiser(num_samples_uniform, 8)
 
 
@@ -102,7 +102,7 @@ for i in synthetic_weather_data_IQ.progressbar(range(N_vel), 'Computing:') :
 ###########################Estimations###########################################                
 clutter_power = synthetic_weather_data_IQ.clutter_power(complex_IQ_data, 2*Tu, 3*Tu, clutter_SW_vector * 2/wavelenght, window = 'Kaiser', alpha = 8)                
 #predictions using the NN
-model = tf.keras.models.load_model('GPU_100_512model.h5')
+model = tf.keras.models.load_model('CPU_100_512model.h5')
 vel_pred, sw_pred, csr_pred = RadarNet.prediction(model, data_PSD, device = '/GPU:0')                
 
 try:
