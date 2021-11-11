@@ -176,12 +176,15 @@ def prediction(model, data_PSD, device = 'CPU:/0'):
     """
     with tf.device(device):
         
+        start = time.time()  
         (y_pred_vel, y_pred_sw, y_pred_csr) = model.predict(data_PSD)
         y_pred_vel = np.argmax(y_pred_vel, axis = 1)
         y_pred_sw = np.argmax(y_pred_sw, axis = 1)
         y_pred_csr = np.argmax(y_pred_csr, axis = 1)
+        end = time.time()
+        elapsed_time = end - start
         
-        return y_pred_vel, y_pred_sw, y_pred_csr
+        return y_pred_vel, y_pred_sw, y_pred_csr, elapsed_time
     
 
 

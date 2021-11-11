@@ -110,7 +110,7 @@ velocity_branch_NNs = [dict_vel_layers_1, dict_vel_layers_2, dict_vel_layers_3, 
 sw_branch_NNs = [dict_width_layers_1, dict_width_layers_2, dict_width_layers_3, dict_width_layers_4, dict_width_layers_5, dict_width_layers_6, dict_width_layers_7, dict_width_layers_8, dict_width_layers_9, dict_width_layers_10, dict_width_layers_11, dict_width_layers_12]
 csr_branch_NNs = [dict_csr_layers_1, dict_csr_layers_2, dict_csr_layers_3, dict_csr_layers_4, dict_csr_layers_5, dict_csr_layers_6, dict_csr_layers_7, dict_csr_layers_8, dict_csr_layers_9, dict_csr_layers_10, dict_csr_layers_11, dict_csr_layers_12]
 #############
-EPOCHS = 100
+EPOCHS = 150
 BS = 512
 lr = 1e-4
 
