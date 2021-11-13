@@ -57,21 +57,26 @@ device = '/CPU:0'
 
 # model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
 
-dict_vel_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 70] }
-dict_width_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 50] }
-dict_csr_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 60] }
-# model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_layers, dict_width_layers, dict_csr_layers)
-############################
-# model.summary()
+# dict_vel_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 70] }
+# dict_width_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 50] }
+# dict_csr_layers = {'conv':[[5,5],[5,5]], 'dense':[100, 60] }
 
-EPOCHS = 100
+dict_vel_layers = {'conv':[[6,20]], 'dense':[150, 100] }
+dict_width_layers = {'conv':[[6,20]], 'dense':[150, 80] }
+dict_csr_layers = {'conv':[[6,20]], 'dense':[150, 90] }
+
+model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_layers, dict_width_layers, dict_csr_layers)
+############################
+model.summary()
+
+EPOCHS = 200
 BS = 512
 lr = 1e-4
 directory_to_save_model = device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5'
-# H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save_model, EPOCHS, BS, lr)
+H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save_model, EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
-#RadarNet.plot_training(H, 'plot_training/')
+RadarNet.plot_training(H, 'plot_training/')
 
 ########################Predictions to build the class diference histograms #######
 

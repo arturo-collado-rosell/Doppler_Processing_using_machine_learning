@@ -65,12 +65,12 @@ y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
 y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 
 
-# device = '/CPU:0'
-device = '/GPU:0'
+device = '/CPU:0'
+# device = '/GPU:0'
 architecture = ['0','1','2','3','4','5','6','7','8','9','10','11']
 
 
-L = 10
+L = 2
 elapsed_time = np.zeros((len(architecture),L))  
 elapsed_time_mean = np.zeros((len(architecture),1))
 elapsed_time_std = np.zeros((len(architecture),1))
