@@ -3,14 +3,17 @@
 """
 Created on Wed Oct 20 18:03:12 2021
 
+This script is to train and validate the NN
+
+
 @author: Arturo Collado Rosell
 """
 
-import sys
-# insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, 'machine_learning_scripts/')
+# import sys
+# # insert at 1, 0 is the script path (or '' in REPL)
+# sys.path.insert(1, 'machine_learning_scripts/')
+import os
 import RadarNet 
-
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -25,13 +28,14 @@ session = InteractiveSession(config=config)
 
 
 #number of categories, from the some_params_to_train.npy is extracted this information
+dirName = 'training_data/'
 try:
-    meta_params = np.load('some_params_to_train.npy')
+    meta_params = np.load(dirName + 'some_params_to_train.npy')
     N_vel = int(meta_params[0])
     N_s_w = int(meta_params[1])
     N_csr = int(meta_params[2])
     operation_mode = str(meta_params[3])
-    training_data = np.load('training_data.npy')
+    training_data = np.load(dirName + 'training_data.npy')
     M = training_data.shape[1]-3
     X = training_data[:,:M].copy()
     y = training_data[:,M:].copy()
@@ -51,8 +55,8 @@ y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
 y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 
 
-device = '/CPU:0'
-# device = '/GPU:0'
+# device = '/CPU:0'
+device = '/GPU:0'
 # Here you can build your model, every brach separated or the deafult branch networks 
 
 # model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
@@ -69,14 +73,22 @@ model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_l
 ############################
 model.summary()
 
-EPOCHS = 200
+EPOCHS = 100
 BS = 512
 lr = 1e-4
-directory_to_save_model = device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5'
+
+plot_dir = 'plot_training/'
+if not os.path.exists(plot_dir):
+     os.mkdir(plot_dir)
+     print("Directory " , plot_dir ,  " Created ")
+else:    
+     print("Directory " , plot_dir ,  " already exists")
+
+directory_to_save_model = plot_dir  +device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5'
 H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save_model, EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
-RadarNet.plot_training(H, 'plot_training/')
+RadarNet.plot_training(H, plot_dir)
 
 ########################Predictions to build the class diference histograms #######
 
@@ -92,9 +104,9 @@ diff_vel = ypred_vel - y_test[:,1]
 diff_width = ypred_width - y_test[:,2]
 diff_csr = ypred_csr - y_test[:,0]
 
-pd.DataFrame(diff_vel).to_csv("velocity_diff.csv")
-pd.DataFrame(diff_width).to_csv( "sw_diff.csv")
-pd.DataFrame(diff_csr).to_csv("CSR_diff.csv")
+pd.DataFrame(diff_vel).to_csv(plot_dir + "velocity_diff.csv")
+pd.DataFrame(diff_width).to_csv(plot_dir + "sw_diff.csv")
+pd.DataFrame(diff_csr).to_csv(plot_dir + "CSR_diff.csv")
 
 import matplotlib.pyplot as plt
 fig = plt.figure() 

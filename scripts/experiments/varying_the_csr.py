@@ -11,7 +11,7 @@ the CSR
 """
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, 'machine_learning_scripts/')
+sys.path.insert(1, '../')
 import matplotlib.pyplot as plt
 import RadarNet 
 
@@ -27,6 +27,7 @@ session = InteractiveSession(config=config)
 
 np.random.seed(2021) # seed for reproducibility 
 
+######Simulation Parameers#####################################################
 Tu = 0.25e-3
 PRF = 1/Tu
 M = 64
@@ -109,14 +110,17 @@ for i in synthetic_weather_data_IQ.progressbar(range(N_vel), 'Computing:') :
                 psd = psd /np.max(psd)
                 data_PSD[i*N_Sc*N_sw*L + q*N_sw*L + j*L + ind_l,:] = 10*np.log10(psd[0,:])
                 
-###########################Estimations###########################################                
+###########################Estimations########################################## 
+################Clutter power###################################################           
 clutter_power = synthetic_weather_data_IQ.clutter_power(complex_IQ_data, 2*Tu, 3*Tu, clutter_spectral_width * 2/wavelenght, window = 'Kaiser', alpha = 8)                
+################################################################################
 #predictions using the NN
-model = tf.keras.models.load_model('GPU_100_512model.h5')
-vel_pred, sw_pred, csr_pred = RadarNet.prediction(model, data_PSD, device = '/GPU:0')                
+
+model = tf.keras.models.load_model('../plot_training/'+'GPU_100_512model.h5')
+vel_pred, sw_pred, csr_pred, time = RadarNet.prediction(model, data_PSD, device = '/GPU:0')                
 
 try:
-    meta_params = np.load('some_params_to_train.npy')
+    meta_params = np.load('../training_data/some_params_to_train.npy')
     N_vel_grid = int(meta_params[0])
     N_s_w_grid = int(meta_params[1])
     N_csr_grid = int(meta_params[2])

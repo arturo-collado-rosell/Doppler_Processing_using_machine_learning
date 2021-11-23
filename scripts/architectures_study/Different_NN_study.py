@@ -10,7 +10,7 @@ Created on Fri Nov  5 18:57:56 2021
 import sys
 import os
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, 'machine_learning_scripts/')
+sys.path.insert(1, '../')
 import RadarNet 
 
 import numpy as np
@@ -27,12 +27,12 @@ session = InteractiveSession(config=config)
 
 #number of categories, from the some_params_to_train.npy is extracted this information
 try:
-    meta_params = np.load('some_params_to_train.npy')
+    meta_params = np.load('../training_data/some_params_to_train.npy')
     N_vel = int(meta_params[0])
     N_s_w = int(meta_params[1])
     N_csr = int(meta_params[2])
     operation_mode = str(meta_params[3])
-    training_data = np.load('training_data.npy')
+    training_data = np.load('../training_data/training_data.npy')
     M = training_data.shape[1]-3
     X = training_data[:,:M].copy()
     y = training_data[:,M:].copy()
@@ -110,7 +110,7 @@ velocity_branch_NNs = [dict_vel_layers_1, dict_vel_layers_2, dict_vel_layers_3, 
 sw_branch_NNs = [dict_width_layers_1, dict_width_layers_2, dict_width_layers_3, dict_width_layers_4, dict_width_layers_5, dict_width_layers_6, dict_width_layers_7, dict_width_layers_8, dict_width_layers_9, dict_width_layers_10, dict_width_layers_11, dict_width_layers_12]
 csr_branch_NNs = [dict_csr_layers_1, dict_csr_layers_2, dict_csr_layers_3, dict_csr_layers_4, dict_csr_layers_5, dict_csr_layers_6, dict_csr_layers_7, dict_csr_layers_8, dict_csr_layers_9, dict_csr_layers_10, dict_csr_layers_11, dict_csr_layers_12]
 #############
-EPOCHS = 150
+EPOCHS = 100
 BS = 512
 lr = 1e-4
 
@@ -125,5 +125,5 @@ for i, vel_dict, sw_dict, csr_dict in zip(np.arange(1,13,1) ,velocity_branch_NNs
     model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, vel_dict, sw_dict, csr_dict)
     
     H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, dirName, EPOCHS, BS, lr)
-    RadarNet.plot_training(H, dirName)
+    RadarNet.plot_training(H, dirName, False)
     

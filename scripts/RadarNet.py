@@ -53,12 +53,12 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
                   
         end = time.time()
         # Saving the model
-        model.save(directory_to_save)
+        model.save(directory_to_save + 'model.h5')
         elapsed_time = end - start
         print('The trainig time was {} seconds'.format(elapsed_time))    
         return H
 
-def plot_training( H, directory_to_save):
+def plot_training( H, directory_to_save, plot = True):
     # plot the total loss, category loss, and color loss
     lossNames = ["loss", "velocity_output_loss", "width_output_loss", "csr_output_loss"]
     plt.style.use("ggplot")
@@ -86,7 +86,9 @@ def plot_training( H, directory_to_save):
     # save the losses figure and create a new figure for the accuracies
     plt.tight_layout()
     plt.savefig(directory_to_save + "{}_loss.png".format('train_and_validate'))
-    plt.show()
+    if plot == True:
+        plt.show()    
+    
     
     
     # create a new figure for the accuracies
@@ -112,7 +114,8 @@ def plot_training( H, directory_to_save):
     # save the accuracies figure
     plt.tight_layout()
     plt.savefig(directory_to_save  + "{}_accs.png".format('train_and_validate'))
-    plt.show()
+    if plot == True:
+        plt.show() 
 
 # #create a new figure for the Precision
 #     precisionNames = ["velocity_output_precision_2", "width_output_precision_2", "csr_output_precision_2"]
@@ -186,11 +189,6 @@ def prediction(model, data_PSD, device = 'CPU:/0'):
         
         return y_pred_vel, y_pred_sw, y_pred_csr, elapsed_time
     
-
-
-
-
-
 
 def build_conv1D_vel_branch(inputs, numCategories, dict_vel_layers, finalAct = 'softmax'):   
     conv_layers = dict_vel_layers['conv']

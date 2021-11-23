@@ -9,7 +9,7 @@ Created on Thu Nov 11 15:52:11 2021
 import sys
 import os
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, 'machine_learning_scripts/')
+sys.path.insert(1, '../')
 import RadarNet 
 import numpy as np
 import pandas as pd
@@ -23,29 +23,14 @@ config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
-numCategories_csr = 26
-numCategories_velocity = 50
-numCategories_width = 10
 
-# type_of_training = 'fenomeno'
-type_of_training = 'clutter_and_fenomeno'
-train_directory_data = '../Matlab_scripts/training_data/' 
-
-if type_of_training == 'fenomeno':
-    train_name = 'data_train_fenomeno'
-    validate_name = 'data_validate_fenomeno'
-else:
-    train_name = 'data_train'
-    validate_name = 'data_validate'
-    
-#number of categories, from the some_params_to_train.npy is extracted this information
 try:
-    meta_params = np.load('some_params_to_train.npy')
+    meta_params = np.load('../training_data/some_params_to_train.npy')
     N_vel = int(meta_params[0])
     N_s_w = int(meta_params[1])
     N_csr = int(meta_params[2])
     operation_mode = str(meta_params[3])
-    training_data = np.load('training_data.npy')
+    training_data = np.load('../training_data/training_data.npy')
     M = training_data.shape[1]-3
     X = training_data[:,:M].copy()
     y = training_data[:,M:].copy()
@@ -65,24 +50,24 @@ y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
 y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 
 
-device = '/CPU:0'
-# device = '/GPU:0'
+# device = '/CPU:0'
+device = '/GPU:0'
 architecture = ['0','1','2','3','4','5','6','7','8','9','10','11']
 
 
-L = 2
+L = 10
 elapsed_time = np.zeros((len(architecture),L))  
 elapsed_time_mean = np.zeros((len(architecture),1))
 elapsed_time_std = np.zeros((len(architecture),1))
 
 
-dir1 = '/media/acr/Elements/estudio arquitecturas/'
+dir1 = ''
 
 for t in range(0,L):
    
     for i in range(0,len(architecture)):
                 
-                directory_to_read_models =  dir1 + 'structure_number_' + str(i)  +'GPUentrenamiento_158_/'
+                directory_to_read_models =  dir1 + 'structure_number_' + str(i+1)  +'CPUentrenamiento_158_/'
                 model = tf.keras.models.load_model(directory_to_read_models + 'model.h5')
         
                 _,_,_,elapsed_time[i][t] = RadarNet.prediction(model, X_test, device)

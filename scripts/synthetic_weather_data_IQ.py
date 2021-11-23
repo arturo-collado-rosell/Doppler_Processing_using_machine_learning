@@ -14,7 +14,7 @@ import numpy.matlib
 
 def synthetic_IQ_data( **kwargs ):
     
-    """ Function to create synthetic IQ weather data. The DEP model for phenomenom and 
+    """ Function to create synthetic IQ weather data. The power spectral density (PSD) model for phenomenon and 
     clutter are gaussian functions. This function follows the ideas of the paper 
     "Simulation of weatherlike Doppler spectra and signals" by Dusan Zrnic, 1975
     
@@ -38,7 +38,7 @@ def synthetic_IQ_data( **kwargs ):
         z_IQ: numpy array of shape [num_realization, M] with the complex IQ data
         time: time grid.
         
-        posible calls:
+        possible calls:
             data, time = synthetic_IQ_data(**params), where params is a dictionary 
             with parameters name as keys
     
@@ -220,17 +220,15 @@ def PSD_estimation_parallel(z_IQ, PRF, w):
     """
     U = sum(w**2) # window energy
     (I,M) = z_IQ.shape
+    psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
     
-    if I == 1:
-        psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
-    else:
-        psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
+    # if I == 1:
+    #     psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
+    # else:
+    #     psd = 1/PRF/U * np.abs(np.fft.fft(z_IQ, axis = 1))**2
     return psd    
     
     
-    
-    
-        
     
 def zero_interpolation(z_IQ, int_stagg):
     
@@ -245,7 +243,7 @@ def zero_interpolation(z_IQ, int_stagg):
     Return:
     ------
     z_IQ_interp: numpy array
-        staggered data with zero interpolation    
+        staggered data with zero added between samples    
     
     """
     (I,M) = z_IQ.shape
@@ -264,6 +262,20 @@ def window_spectral_width(window, PRF):
     return sw_window*PRF
 
 def clutter_power(z_IQ, T1, T2, clutter_sw, window = 'Kaiser', alpha = 8):
+    """ Function to estimate the clutter power 
+        if T1 == T2 means uniform mode else staggered mode
+        
+        Inputs:
+            z_IQ: complex IQ data
+            T1: pulse repetition time (PRT) 1 [s]
+            T2: PRT 2 [s]
+            clutter_sw: asymptotic clutter spectral width [Hz]
+            window: the windows, at the moment it could only be the Kaiser window
+            alpha: the window parameter
+        Output:
+            clutter_power_e: estimated clutter power
+    
+    """
     I,M = z_IQ.shape
     if T1 == T2:
         Tu = T1
@@ -299,40 +311,10 @@ def clutter_power(z_IQ, T1, T2, clutter_sw, window = 'Kaiser', alpha = 8):
         clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
     else:
         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
-    # if len(clutter_sw) == 1:        
-    #     sw_clutter = np.sqrt(clutter_sw**2 + sw_window**2)
-    #     df = 1/Tu/(M)
-    #     if operation_mode == 'staggered':
-    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
-    #         clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
-    #     else:
-    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
-    # elif len(clutter_sw)> 1:
-    #     sw_clutter = np.sqrt(clutter_sw**2 + np.ones(clutter_sw.shape)*sw_window**2)
-    #     df = 1/Tu/(M)
-    #     if operation_mode == 'staggered':
-    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
-    #         clutter_power_e = clutter_power_e + 2* np.cos(2*np.pi/5)**2 + 2* np.cos(4*np.pi/5)**2 
-    #     else:
-    #         clutter_power_e = np.sqrt(2 * np.pi)* sw_clutter * (psd[:,0] + psd[:,-1] + psd[:,1]) / (1 + 2 * np.exp(- df**2 / (2 * clutter_sw**2)))
-        
-        
-        
-    
+
     return clutter_power_e
         
-     
-                
-            
-        
-    
-    
-    
-    
-    
-    
-    
-           
+  
 def progressbar(it, prefix="", size=60, file=sys.stdout):
     count = len(it)
     def show(j):
@@ -532,8 +514,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
                         data_PSD[i*N_Sc*N_snr*N_s_w*L + s*N_snr*N_s_w*L + n*N_s_w*L + q*L + j, num_samples_uniform+2] = q
                                  
                         
-    return data_PSD, N_vel, N_s_w, N_csr, radar_mode                    
-    # np.save('data_to_train', data_PSD)             
+    return data_PSD, N_vel, N_s_w, N_csr, radar_mode                                 
     print('Data generation has finished')                    
                         
    
