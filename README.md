@@ -7,6 +7,11 @@
 + In the requirement.txt file you will find the needed libraries to run all scripts. You can install it using pip, e.g. pip install requirement.txt
 
 ## Scripts
+In the script folder you will find different python scripts. In order to train the Neural Network, first, you need to generate the training data, then to train the NN and test it. You must to execute the scripts following the next order:
++ data_gen_ML_training.py -> This script will generate the training data, you can modify any parameter depending on your interest. The default parameters are the same as in the paper.
++ trainig_script.py -> This script will train and validate the NN. If you want you can modify de default NN model. This script will generate a folder with all the training and validation results, also with the trained NN model.
+
+## Testing the trained NN with diferent experiments
 
 
 
