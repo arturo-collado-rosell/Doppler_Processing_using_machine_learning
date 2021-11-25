@@ -12,6 +12,9 @@ In the script folder, you will find different python scripts. In order to train 
 + trainig_script.py -> This script will train and validate the NN. If you want you can modify de default NN model. This script will generate a folder with all the training and validation results, also with the trained NN model.
 
 ## Testing the trained NN with diferent experiments
+In the directory scripts/experiments you will find three different experiments. The script names are auto descriptives. 
 
+## NN architecture study
+In the directory scripts/architectures_study you will find two python scripts, one for training different NN and the other for prediction time study
 
 
