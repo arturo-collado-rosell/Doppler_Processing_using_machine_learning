@@ -55,8 +55,8 @@ y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
 y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 
 
-device = '/CPU:0'
-# device = '/GPU:0'
+# device = '/CPU:0'
+device = '/GPU:0'
 # Here you can build your model, every brach separated or the deafult branch networks 
 
 # model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
