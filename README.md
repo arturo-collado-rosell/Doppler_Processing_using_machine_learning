@@ -4,7 +4,7 @@
 + Hello, this document has the objective to guide you through the different python scripts to reproduce the paper results. 
 + In order to use the GPU, you need to install the GPU drivers. If you do not have a GPU, no problem, the code run on CPU too.
 + I strongly recommend the use of an environment to install the different python libraries 
-+ In the requirement.txt file you will find the needed libraries to run all scripts. You can install it using pip, e.g. pip install requirement.txt
++ In the requirement.txt file you will find the needed libraries to run all scripts. You can install it using pip, e.g. pip install -r requirement.txt
 
 ## Scripts
 In the script folder, you will find different python scripts. In order to train the Neural Network, first, you have to generate the training data, then train and validate the NN. You must to execute the scripts following the next order:
@@ -16,5 +16,7 @@ In the directory scripts/experiments you will find three different experiments. 
 
 ## NN architecture study
 In the directory scripts/architectures_study you will find two python scripts, one for training different NN and the other for prediction time study
+
+The algorithms ASPASS, DA and SPPP are not implemented in this repository. It only contains the NN results.
 
 
