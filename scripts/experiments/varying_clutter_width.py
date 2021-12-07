@@ -103,7 +103,7 @@ for i in synthetic_weather_data_IQ.progressbar(range(N_vel), 'Computing:') :
 clutter_power = synthetic_weather_data_IQ.clutter_power(complex_IQ_data, 2*Tu, 3*Tu, clutter_SW_vector * 2/wavelenght, window = 'Kaiser', alpha = 8)                
 #predictions using the NN
 model = tf.keras.models.load_model('../plot_training/'+'GPU_100_512model.h5')
-vel_pred, sw_pred, csr_pred, time = RadarNet.prediction(model, data_PSD, device = '/GPU:0')                
+vel_pred, sw_pred, csr_pred, time = RadarNet.prediction(model, data_PSD, device = '/CPU:0')                
 
 try:
     meta_params = np.load('../training_data/some_params_to_train.npy')

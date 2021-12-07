@@ -141,7 +141,7 @@ def synthetic_IQ_data( **kwargs ):
     if clutterFlag:
         
         dep_c = clutter_power / np.sqrt(2 * np.pi)/ c_s_w_f * np.exp(-(f )**2 / (2 * c_s_w_f**2))
-        np.roll(dep_c, idx_0)    
+           
         
     dep = dep_p + dep_c
     

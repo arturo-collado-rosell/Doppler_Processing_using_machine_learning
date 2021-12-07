@@ -55,8 +55,8 @@ y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
 y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
 
 
-# device = '/CPU:0'
-device = '/GPU:0'
+device = '/CPU:0'
+# device = '/GPU:0'
 # Here you can build your model, every brach separated or the deafult branch networks 
 
 # model = RadarNet.build_all_conv1D(M, N_vel, N_s_w, N_csr) # the default branches, see the paper 
@@ -84,7 +84,7 @@ if not os.path.exists(plot_dir):
 else:    
      print("Directory " , plot_dir ,  " already exists")
 
-directory_to_save_model = plot_dir  +device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  + 'model.h5'
+directory_to_save_model = plot_dir  +device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  
 H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save_model, EPOCHS, BS, lr)
 
 #Ploting the training and validation metrics
