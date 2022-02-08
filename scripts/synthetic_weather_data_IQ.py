@@ -421,7 +421,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
             s_w_interval_min = kwargs['s_w_interval'][0]
             s_w_interval_max = kwargs['s_w_interval'][1]
         else:
-            s_w_interval_min = 0.04
+            s_w_interval_min = 0.01
             s_w_interval_max = 0.2          
             
         # staggered indexs
