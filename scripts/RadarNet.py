@@ -34,7 +34,7 @@ def model_compile_and_train(device, model, X_train, y_train_cat_vel, y_train_cat
         lossWeights = {"velocity_output": 1.0, "width_output": 1.0 , "csr_output": 1.0}    
 
     
-        model.compile(optimizer = opt, loss = losses, loss_weights = lossWeights, metrics=["accuracy", tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
+        model.compile(optimizer = opt, loss = losses, loss_weights = lossWeights, metrics=["accuracy"])#, tf.keras.metrics.Precision(), tf.keras.metrics.Recall()
         custom_early_stopping = EarlyStopping(
                 monitor='val_loss', 
                 patience=15, 

@@ -415,7 +415,7 @@ def synthetic_data_train(M, Fc, Tu = 0.25e-3, theta_3dB_acimut = 1, radar_mode =
         if 'N_spectral_w' in kwargs:
             N_s_w = kwargs['N_spectral_w']
         else:
-            N_s_w = 10
+            N_s_w = 15
                              
         if 's_w_interval' in kwargs:
             s_w_interval_min = kwargs['s_w_interval'][0]

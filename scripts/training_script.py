@@ -73,7 +73,7 @@ model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_l
 ############################
 model.summary()
 
-EPOCHS = 101
+EPOCHS = 2
 BS = 512
 lr = 1e-4
 
@@ -87,6 +87,7 @@ else:
 directory_to_save_model = plot_dir  +device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  
 H = RadarNet.model_compile_and_train(device,model, X_train, y_train_cat_vel, y_train_cat_s_w, y_train_cat_csr, X_test, y_test_cat_vel, y_test_cat_s_w, y_test_cat_csr, directory_to_save_model, EPOCHS, BS, lr)
 
+score = model.evaluate(X_test, {"velocity_output" :y_test_cat_vel, "width_output" : y_test_cat_s_w, "csr_output" : y_test_cat_csr}, verbose=0)
 #Ploting the training and validation metrics
 RadarNet.plot_training(H, plot_dir)
 
