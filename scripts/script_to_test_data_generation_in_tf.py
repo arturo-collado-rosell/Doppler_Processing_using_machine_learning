@@ -23,35 +23,22 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
 #number of categories, from the some_params_to_train.npy is extracted this information
-# dirName = 'training_data/'
-# try:
-#     meta_params = np.load(dirName + 'some_params_to_train.npy')
-#     N_vel = int(meta_params[0])
-#     N_s_w = int(meta_params[1])
-#     N_csr = int(meta_params[2])
-#     operation_mode = str(meta_params[3])
-#     training_data = np.load(dirName + 'training_data.npy')
-#     M = training_data.shape[1]-3
-#     X = training_data[:,:M].copy()
-#     y = training_data[:,M:].copy()
-#     del training_data
-# except Exception as e:
-#     print(e)     
+dirName = 'training_data/'
+try:
+    meta_params = np.load(dirName + 'some_params_to_train.npy')
+    N_vel = int(meta_params[0])
+    N_s_w = int(meta_params[1])
+    N_csr = int(meta_params[2])
+    M = int(meta_params[3])
+    number_of_batch = int(meta_params[4])
+    batch_size = int(meta_params[5])
+    operation_mode = str(meta_params[6])
+
+except Exception as e:
+    print(e)     
     
 
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 29)
-# #converting the labels to categorical 
-# y_train_cat_csr = tf.keras.utils.to_categorical(y_train[:,0], N_csr)
-# y_train_cat_vel = tf.keras.utils.to_categorical(y_train[:,1], N_vel)
-# y_train_cat_s_w = tf.keras.utils.to_categorical(y_train[:,2], N_s_w)
 
-# y_test_cat_csr = tf.keras.utils.to_categorical(y_test[:,0], N_csr)
-# y_test_cat_vel = tf.keras.utils.to_categorical(y_test[:,1], N_vel)
-# y_test_cat_s_w = tf.keras.utils.to_categorical(y_test[:,2], N_s_w)
-M = 158
-N_vel = 50
-N_s_w = 15
-N_csr = 26
 # device = '/CPU:0'
 device = '/GPU:0'
 # Here you can build your model, every brach separated or the deafult branch networks 
@@ -70,9 +57,8 @@ model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_l
 ############################
 model.summary()
 
-EPOCHS = 2
-BS = 512
-lr = 1e-4
+
+
 
 plot_dir = 'plot_training/'
 if not os.path.exists(plot_dir):
@@ -81,10 +67,13 @@ if not os.path.exists(plot_dir):
 else:    
      print("Directory " , plot_dir ,  " already exists")
 
-directory_to_save_model = plot_dir  +device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  
-opt = Adam(lr=1e-4) 
+
+lr = 1e-4
+opt = Adam(lr=lr) 
 EPOCHS = 100
-BS = 512
+BS = batch_size
+
+directory_to_save_model = plot_dir  +device[1:4]  + '_' + str(EPOCHS) + '_' + str(BS)  
 
 losses = {"velocity_output":"categorical_crossentropy","width_output":"categorical_crossentropy", "csr_output":"categorical_crossentropy"}
 lossWeights = {"velocity_output": 1.0, "width_output": 1.0 , "csr_output": 1.0}    
@@ -93,18 +82,19 @@ lossWeights = {"velocity_output": 1.0, "width_output": 1.0 , "csr_output": 1.0}
 model.compile(optimizer = opt, loss = losses, loss_weights = lossWeights, metrics=["accuracy"])#, tf.keras.metrics.Precision(), tf.keras.metrics.Recall()
 custom_early_stopping = EarlyStopping(
         monitor='val_loss', 
-        patience=15, 
+        patience=10, 
         min_delta=0.005, 
         mode='auto'
         )
 
-params = {"dim": 158,
+params = {"dim": M,
           "batch_size": BS,
           "n_classes": (N_csr, N_vel, N_s_w)
           }
 
-training_IDs = [i for i in range(1200)]
-validation_IDs = [j for j in range(1200,1451)]
+
+training_IDs = [i for i in range(int(number_of_batch*0.8))]
+validation_IDs = [j for j in range(int(number_of_batch*0.8),number_of_batch)]
 
 #Generators
 training_generator = DataGenerator(training_IDs, **params)
