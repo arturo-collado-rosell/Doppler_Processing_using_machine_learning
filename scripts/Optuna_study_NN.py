@@ -46,7 +46,7 @@ except Exception as e:
 
 device = '/GPU:0'
 
-EPOCHS = 100
+EPOCHS = 120
 
 dirName_models = 'models/'
 if not os.path.exists(dirName_models):
@@ -111,7 +111,7 @@ def objective(trial):
             restore_best_weights = True
             )
 
-        model.fit(training_generator,
+        H = model.fit(training_generator,
                       validation_data = validation_generator,
                       epochs = EPOCHS,
                       use_multiprocessing=True,
@@ -120,12 +120,15 @@ def objective(trial):
                       callbacks=[custom_early_stopping])
         score = model.evaluate(validation_generator)
         model.save(dirName_models + f'_{trial.number}.h5' )
+        
+        H_df = pd.DataFrame(H.history)
+        H_df.to_csv(dirName_models + f'_{trial.number}' + '.csv')
     
     return score[4], score[5], score[6]
 
 if __name__ == "__main__":
     study = optuna.create_study(directions=["maximize", "maximize", "maximize"])
-    study.optimize(objective, n_trials= 30 )
+    study.optimize(objective, n_trials= 50 )
     best_params = study.best_params
     df = study.trials_dataframe()
     df.head()
