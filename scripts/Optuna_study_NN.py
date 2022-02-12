@@ -124,10 +124,10 @@ def objective(trial):
         H_df = pd.DataFrame(H.history)
         H_df.to_csv(dirName_models + f'_{trial.number}' + '.csv')
     
-    return score[4], score[5], score[6]
+    return score[4], score[5], score[6], (score[4] + score[5] + score[6])/3 
 
 if __name__ == "__main__":
-    study = optuna.create_study(directions=["maximize", "maximize", "maximize"])
+    study = optuna.create_study(directions=["maximize", "maximize", "maximize", "maximize"])
     study.optimize(objective, n_trials= 50 )
     best_params = study.best_params
     df = study.trials_dataframe()
