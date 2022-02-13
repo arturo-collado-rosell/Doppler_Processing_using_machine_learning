@@ -29,7 +29,7 @@ from keras.backend import clear_session
 
 
 dirName = 'training_data/'
-dirName = 'training_data/'
+
 try:
     meta_params = np.load(dirName + 'some_params_to_train.npy')
     N_vel = int(meta_params[0])
