@@ -14,17 +14,23 @@ import tensorflow as tf
 import time
 
 optuna_dir = 'models/'
-# df_optuna = pd.read_csv(optuna_dir+ 'optuna_study.csv')
-# print(df_optuna.columns)
+df_optuna = pd.read_csv(optuna_dir+ 'optuna_study.csv')
+print(df_optuna.columns)
 
-# fig = plt.figure(figsize=(10,6))
-# plt.plot(df_optuna.number, df_optuna.values_0, '*')
-# plt.plot(df_optuna.number, df_optuna.values_1, '<')
-# plt.plot(df_optuna.number, df_optuna.values_2, 'o')
+fig = plt.figure(figsize=(10,6))
+plt.plot(df_optuna.number, df_optuna.values_0, '*', label = 'velocity branch')
+plt.plot(df_optuna.number, df_optuna.values_1, '<', label = 'width branch')
+plt.plot(df_optuna.number, df_optuna.values_2, 'o', label = 'csr branch')
+plt.legend()
+plt.xlabel('Structures number')
+plt.ylabel('Accuracy')
+plt.grid()
+fig.show()
 
-# plt.grid()
-# fig.show()
-
+#saving accuracy values
+df_optuna.values_0.to_csv(optuna_dir + 'vel_accu.csv')
+df_optuna.values_1.to_csv(optuna_dir + 'width_accu.csv')
+df_optuna.values_2.to_csv(optuna_dir + 'csr_accu.csv')
 
 dirName = 'training_data/'
 
@@ -58,20 +64,19 @@ device = '/CPU:0'
 elapsed_time = np.zeros((architectures,L))
 elapsed_time_mean = np.zeros((architectures,))
 elapsed_time_std = np.zeros((architectures,))
-for t in range(0,L):
+
+for i in range(architectures):
+    for t in range(0,L):
    
-    for i in range(architectures):
-                
-                
+
                 model = tf.keras.models.load_model(optuna_dir + f'_{i}.h5')
                 start = time.time()
                 with tf.device(device):
                     model.predict(validation_generator, use_multiprocessing = True, workers=-1)
                                     
-                end = time.time()
-        
+                end = time.time()        
                 elapsed_time[i][t] = end - start
-    print(t,' ', i)    
+                print(i,' ', t)    
 for qq in range(0,elapsed_time.shape[0]):
     elapsed_time_mean[qq] = np.mean(elapsed_time[qq][:])
     elapsed_time_std[qq] = np.std(elapsed_time[qq][:])
@@ -79,3 +84,27 @@ for qq in range(0,elapsed_time.shape[0]):
     
 pd.DataFrame(elapsed_time_mean).to_csv(optuna_dir +'time_to_predict_mean' + device[1:4] + '.csv')
 pd.DataFrame(elapsed_time_std).to_csv(optuna_dir + 'time_to_predict_std' + device[1:4] + '.csv')
+fig = plt.figure(figsize = (5,3))
+plt.plot(elapsed_time_mean,'o')
+plt.grid()
+plt.xlabel('Structure number')
+plt.ylabel('time [s]')
+fig.show()
+# #
+struct_and_time = []
+for i, value in enumerate(elapsed_time_mean):
+    struct_and_time.append([i, value])
+
+#sorting bubble algorithm
+for i in range(architectures-1):
+    for j in range(architectures - i - 1):
+        if struct_and_time[j][1] > struct_and_time[j+1][1]:
+            struct_and_time[j], struct_and_time[j+1] = struct_and_time[j+1], struct_and_time[j] 
+            
+    
+    
+
+
+  
+    
+    

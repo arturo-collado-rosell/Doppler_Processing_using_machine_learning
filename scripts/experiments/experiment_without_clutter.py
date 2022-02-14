@@ -34,7 +34,7 @@ wavelenght = c/Fc
 va = wavelenght*PRF/4
 Sp = 1
 vm = 12
-spectral_w = np.linspace(0.04*va, 0.2*va, 20)
+spectral_w = np.linspace(0.01*va, 0.2*va, 30)
 csr = np.linspace(0, 50, 25)
 Sc = Sp * 10**(csr/10)
 
@@ -101,7 +101,7 @@ for i in synthetic_weather_data_IQ.progressbar(range(N_snr), 'Computing:') :
                 
 #predictions using the NN
 
-model = tf.keras.models.load_model('../plot_training/'+'GPU_100_512model.h5')
+model = tf.keras.models.load_model('../models/'+'_3.h5')
 vel_pred, sw_pred, csr_pred, time = RadarNet.prediction(model, data_PSD, device = '/CPU:0')                
 
 try:
@@ -114,7 +114,7 @@ except Exception as e:
 
 
 # spectral width grid
-s_width_grid = np.linspace(0.04, 0.2, N_s_w_grid) * va
+s_width_grid = np.linspace(0.01, 0.2, N_s_w_grid) * va
 # velocity grid
 vel_step = 2.0/N_vel_grid * va
 vel_grid = -np.arange(-va + vel_step/2.0, va , vel_step)    

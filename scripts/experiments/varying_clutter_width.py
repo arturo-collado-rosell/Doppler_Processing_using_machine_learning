@@ -102,7 +102,7 @@ for i in synthetic_weather_data_IQ.progressbar(range(N_vel), 'Computing:') :
 ###########################Estimations###########################################                
 clutter_power = synthetic_weather_data_IQ.clutter_power(complex_IQ_data, 2*Tu, 3*Tu, clutter_SW_vector * 2/wavelenght, window = 'Kaiser', alpha = 8)                
 #predictions using the NN
-model = tf.keras.models.load_model('../plot_training/'+'GPU_100_512model.h5')
+model = tf.keras.models.load_model('../models/'+'_3.h5')
 vel_pred, sw_pred, csr_pred, time = RadarNet.prediction(model, data_PSD, device = '/CPU:0')                
 
 try:
@@ -117,7 +117,7 @@ except Exception as e:
 csr_grid = np.linspace(0, 50, N_csr_grid-1)
 csr_grid = np.concatenate(([-100], csr_grid))
 # spectral width grid
-s_width_grid = np.linspace(0.04, 0.2, N_s_w_grid) * va
+s_width_grid = np.linspace(0.01, 0.2, N_s_w_grid) * va
 # velocity grid
 vel_step = 2.0/N_vel_grid * va
 vel_grid = -np.arange(-va + vel_step/2.0, va , vel_step)    
