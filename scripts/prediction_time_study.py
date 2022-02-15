@@ -59,14 +59,16 @@ params = {"dim": M,
 validation_generator = DataGenerator(validation_IDs, **params)    
 
 L = 10
-architectures = 30
-device = '/CPU:0'
-elapsed_time = np.zeros((architectures,L))
-elapsed_time_mean = np.zeros((architectures,))
-elapsed_time_std = np.zeros((architectures,))
+architectures = 50
+device_list = ['/CPU:0', '/GPU:0']
 
-for i in range(architectures):
-    for t in range(0,L):
+fig = plt.figure(figsize = (5,3))
+for device in device_list:
+    elapsed_time = np.zeros((architectures,L))
+    elapsed_time_mean = np.zeros((architectures,))
+    elapsed_time_std = np.zeros((architectures,))
+    for i in range(architectures):
+        for t in range(0,L):
    
 
                 model = tf.keras.models.load_model(optuna_dir + f'_{i}.h5')
@@ -77,18 +79,17 @@ for i in range(architectures):
                 end = time.time()        
                 elapsed_time[i][t] = end - start
                 print(i,' ', t)    
-for qq in range(0,elapsed_time.shape[0]):
-    elapsed_time_mean[qq] = np.mean(elapsed_time[qq][:])
-    elapsed_time_std[qq] = np.std(elapsed_time[qq][:])
-            
-    
-pd.DataFrame(elapsed_time_mean).to_csv(optuna_dir +'time_to_predict_mean' + device[1:4] + '.csv')
-pd.DataFrame(elapsed_time_std).to_csv(optuna_dir + 'time_to_predict_std' + device[1:4] + '.csv')
-fig = plt.figure(figsize = (5,3))
-plt.plot(elapsed_time_mean,'o')
+    for qq in range(0,elapsed_time.shape[0]):
+        elapsed_time_mean[qq] = np.mean(elapsed_time[qq][:])
+        elapsed_time_std[qq] = np.std(elapsed_time[qq][:])
+    pd.DataFrame(elapsed_time_mean).to_csv(optuna_dir +'time_to_predict_mean' + device[1:4] + '.csv')
+    pd.DataFrame(elapsed_time_std).to_csv(optuna_dir + 'time_to_predict_std' + device[1:4] + '.csv')    
+    plt.plot(elapsed_time_mean,'o', label = 'device[1:4]')
+
 plt.grid()
 plt.xlabel('Structure number')
-plt.ylabel('time [s]')
+plt.ylabel('time [s]')                
+plt.legend()    
 fig.show()
 # #
 struct_and_time = []
