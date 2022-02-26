@@ -123,9 +123,8 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(directions=["maximize", "maximize", "maximize", "maximize"])
     study.optimize(objective, n_trials= 50 )
-    best_params = study.best_params
     df = study.trials_dataframe()
     df.head()
     df.to_csv(dirName_models + "optuna_study.csv")
-    print(best_params)    
+      
     

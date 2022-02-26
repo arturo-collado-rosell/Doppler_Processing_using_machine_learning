@@ -116,7 +116,7 @@ clutter_power = synthetic_weather_data_IQ.clutter_power(complex_IQ_data, 2*Tu, 3
 ################################################################################
 #predictions using the NN
 
-model = tf.keras.models.load_model('../models/'+'_3.h5')
+model = tf.keras.models.load_model('../models/'+'_14.h5')
 vel_pred, sw_pred, csr_pred, time = RadarNet.prediction(model, data_PSD, device = '/CPU:0')                
 
 try:

@@ -73,7 +73,7 @@ model = RadarNet.create_convolutional_network(M, N_vel, N_s_w, N_csr, dict_vel_l
 ############################
 model.summary()
 
-EPOCHS = 2
+EPOCHS = 120
 BS = 512
 lr = 1e-4
 
